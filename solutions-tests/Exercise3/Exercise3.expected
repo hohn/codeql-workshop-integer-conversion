@@ -1,0 +1,5 @@
+| test.cpp:11:20:11:20 | (unsigned int)... |
+| test.cpp:17:7:17:7 | (unsigned int)... |
+| test.cpp:18:7:18:7 | (myuint)... |
+| test.cpp:19:7:19:7 | (myotheruint)... |
+| test.cpp:21:7:21:21 | (unsigned int)... |

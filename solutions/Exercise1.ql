@@ -1,10 +1,9 @@
 import cpp
 
 class SignedInt extends IntType {
-	SignedInt() {
-		this.isSigned()
-	}
+  SignedInt() { this.isSigned() }
 }
 
-from SignedInt s 
-select s
+from Variable v
+where v.getUnderlyingType() instanceof SignedInt
+select v

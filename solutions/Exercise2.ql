@@ -1,10 +1,9 @@
 import cpp
 
 class UnsignedInt extends IntType {
-  UnsignedInt() {
-    this.isUnsigned()
-  }
+  UnsignedInt() { this.isUnsigned() }
 }
 
-from UnsignedInt u
-select u
+from Variable v
+where v.getUnderlyingType() instanceof UnsignedInt
+select v
