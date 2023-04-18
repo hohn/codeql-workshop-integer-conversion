@@ -175,7 +175,8 @@ A solution can be found in the query [Exercise6.ql](solutions/Exercise6.ql)
 
 ### Exercise 7
 
-In the opposite direction unsigned to signed conversion can result in [out of bounds access]( https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-33909) when the signed value is used in a pointer computation.
+In the opposite direction unsigned to signed conversion can result in [out of bounds access]( https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-33909) when the signed value is used in a pointer computation. CVE-2021-33909 is discussed by [Qualys](https://blog.qualys.com/vulnerabilities-threat-research/2021/07/20/sequoia-a-local-privilege-escalation-vulnerability-in-linuxs-filesystem-layer-cve-2021-33909) and [Sequoia variant analysis](https://pwning.systems/posts/sequoia-variant-analysis/).
+The latter discusses a CodeQL query similar to the production query used as an inspiration that can be found at [UnsignedToSignedPointerArith.ql](https://github.com/github/codeql/blob/main/cpp/ql/src/experimental/Security/CWE/CWE-787/UnsignedToSignedPointerArith.ql).
 
 Consider the following example:
 
@@ -222,4 +223,3 @@ Complete the query by establishing that the parameter `n` is used to compute a p
 </details>
 
 A solution can be found in the query [Exercise8.ql](solutions/Exercise8.ql).
-The production query used as an inspiration can be found at [UnsignedToSignedPointerArith.ql](https://github.com/github/codeql/blob/main/cpp/ql/src/experimental/Security/CWE/CWE-787/UnsignedToSignedPointerArith.ql).
