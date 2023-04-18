@@ -221,4 +221,5 @@ Complete the query by establishing that the parameter `n` is used to compute a p
 
 </details>
 
-A solution can be found in the query [Exercise8.ql](solutions/Exercise8.ql)
+A solution can be found in the query [Exercise8.ql](solutions/Exercise8.ql).
+The production query used as an inspiration can be found at [UnsignedToSignedPointerArith.ql](https://github.com/github/codeql/blob/main/cpp/ql/src/experimental/Security/CWE/CWE-787/UnsignedToSignedPointerArith.ql).
