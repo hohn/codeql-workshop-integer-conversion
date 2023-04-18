@@ -6,21 +6,23 @@ In this workshop we will explore integer conversion, how it is represented by th
 
 ## Contents
 
-- [CodeQL workshop for C/C++: Integer Conversion](#codeql-workshop-for-cc-integer-conversion)
+- [CodeQL workshop for C/C++: Integer conversion](#codeql-workshop-for-cc-integer-conversion)
   - [Contents](#contents)
   - [Prerequisites and setup instructions](#prerequisites-and-setup-instructions)
   - [Workshop](#workshop)
     - [Learnings](#learnings)
-    - [Integer Conversion](#control-flow)
-    - [Exercises](#exercises)
-      - [Exercise 1](#exercise-1)
-      - [Exercise 2](#exercise-2)
-      - [Exercise 3](#exercise-3)
-      - [Exercise 4](#exercise-4)
-      - [Exercise 5](#exercise-5)
-      - [Exercise 6](#exercise-6)
-      - [Exercise 7](#exercise-7)
-      - [Exercise 8](#exercise-8)
+    - [Type Conversion Vulnerabilities](#type-conversion-vulnerabilities)
+    - [Type conversions in CodeQL](#type-conversions-in-codeql)
+    - [Signed to unsigned](#signed-to-unsigned)
+  - [Exercises](#exercises)
+    - [Exercise 1](#exercise-1)
+    - [Exercise 2](#exercise-2)
+    - [Exercise 3](#exercise-3)
+    - [Exercise 4](#exercise-4)
+    - [Exercise 5](#exercise-5)
+    - [Exercise 6](#exercise-6)
+    - [Exercise 7](#exercise-7)
+    - [Exercise 8](#exercise-8)
 
 ## Prerequisites and setup instructions
 
@@ -52,7 +54,7 @@ Most security related type conversion issues are implicit conversion from *signe
 
 ### Type conversions in CodeQL
 
-In CodeQL all conversions are modeled by the class [`Conversion`](https://codeql.github.com/codeql-standard-libraries/cpp/semmle/code/cpp/exprs/Cast.qll/type.Cast$Conversion.html) and its sub-classes. 
+In CodeQL all conversions are modeled by the class [`Conversion`](https://codeql.github.com/codeql-standard-libraries/cpp/semmle/code/cpp/exprs/Cast.qll/type.Cast$Conversion.html) and its sub-classes.
 
 ### Signed to unsigned
 
@@ -82,12 +84,13 @@ Next are the exercises used to further explore integer conversion.
 
 ### Exercise 1
 
-Create the a class `SignedInt` that represents that specific `IntType` type. Then write a query that uses class to return all occurrences of that type in any source code. Implement this in [Exercise1.ql](exercises/Exercise1.ql). 
+Create the a class `SignedInt` that represents that specific `IntType` type. Then write a query that uses class to return all occurrences of that type in any source code. Implement this in [Exercise1.ql](exercises/Exercise1.ql).
 
 <details>
 <summary>Hints</summary>
 
 - The `class` keyword is used to write a user defined QL class.
+- C/C++ provides ways such as `typedef` and `using` to create type aliases. The predicate `getUnderlyingType` gets the type after resolving typedefs.
 
 </details>
 
@@ -104,14 +107,13 @@ Create the a class `UnsignedInt` that represents that specific `IntType` type. T
 
 </details>
 
-A solution can be found in the query [Exercise1.ql](solutions/Exercise2.ql)
-
+A solution can be found in the query [Exercise2.ql](solutions/Exercise2.ql)
 
 ### Exercise 3
 
-In the case of `signed int` to `unsiged int` conversions we are interested in the conversion [`IntegeralConversion`](https://codeql.github.com/codeql-standard-libraries/cpp/semmle/code/cpp/exprs/Cast.qll/type.Cast$IntegralConversion.html) class that models *implicit* and *explicit* conversions from one integral type to another. 
+In the case of `signed int` to `unsigned int` conversions we are interested in the conversion [`IntegeralConversion`](https://codeql.github.com/codeql-standard-libraries/cpp/semmle/code/cpp/exprs/Cast.qll/type.Cast$IntegralConversion.html) class that models _implicit_ and _explicit_ conversions from one integral type to another.
 
-Create the class `SignedToUnsignedConversion` that models a `signed int` to `unsigned int` conversion. Use the classes `SignedInt` and `UnsignedInt` defined in exercise 1 and 2.
+Create the class `SignedToUnsignedConversion` that models a `signed int` to `unsigned int` conversion. Use the classes `SignedInt` and `UnsignedInt` defined in [Exercise1.ql](exercises/Exercise1.ql) and [Exercise2.ql](exercises/Exercise2.ql).
 
 Place all relevant classes (and a query that selects from that class) in [Exercise3.ql](exercises/Exercise3.ql).
 
@@ -119,7 +121,7 @@ A solution can be found in the query [Exercise3.ql](solutions/Exercise3.ql)
 
 ### Exercise 4
 
-Now that we have modeled the `signed int` to `unsigned int` conversion write a query that find the vulnerable conversion, in  [Excercise4.ql](exercises/Exercise4.ql).
+Now that we have modeled the `signed int` to `unsigned int` conversion write a query that find the vulnerable conversion, in [Exercise4.ql](exercises/Exercise4.ql).
 
 A solution can be found in the query [Exercise4.ql](solutions/Exercise4.ql)
 
@@ -133,7 +135,7 @@ A solution can be found in the query [Exercise4.ql](solutions/Exercise4.ql)
 <details>
 <summary>Alternative Solution</summary>
 
-```
+```ql
 import cpp
 
 from FunctionCall call, int idx, Expr arg
@@ -152,7 +154,7 @@ Implement a heuristic that can meaningfully reduce the list of results in [Exerc
 <details>
 <summary>Hints</summary>
 
-  - Look for parameters containing the sub-string `len` or `size`.
+  - Look for parameters containing the sub-string `len`, `size`, or `nbyte`.
 
 </details>
 
@@ -179,29 +181,27 @@ Consider the following example:
 
 ```cpp
 char* out_of_bounds(char * c, int n) {
-	char * ptr = c + n;
-	return ptr;
+  char * ptr = c + n;
+  return ptr;
 }
 
 #define INT_MAX 2147483648
 
 int main(void) {
-	unsigned int n = INT_MAX + 1;
-
-	char buf[1024];
-
-	char *ptr = out_of_bounds(buf, n);
-
+  unsigned int n = INT_MAX + 1;
+  char buf[1024];
+  char *ptr = out_of_bounds(buf, n);
 }
 ```
+
 The variable `n` can range from `-2147483648` to `2147483648` (assuming 32-bit integers). Passing an unsigned integer, which can range from `0` to `4294967296`, to a call to `out_of_bounds` can result in a pointer that is out of bound because `n` can become negative.
 
-To find the above vulnerable case, start by write=ing the class `UnsignedToSigned` that identifies conversions from `unsigned int` to `signed int` and put it in [Exercise7.ql](exercises/Exercise7.ql).
+To find the above vulnerable case, start by writing the class `UnsignedToSigned` that identifies conversions from `unsigned int` to `signed int` and put it in [Exercise7.ql](exercises/Exercise7.ql).
 
 <details>
 <summary>Hints</summary>
 
- - this is similar to what we did in Exercise 1-3.
+- this is similar to what we did in Exercise 1-3.
 
 </details>
 
