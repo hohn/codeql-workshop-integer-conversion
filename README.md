@@ -213,6 +213,8 @@ A solution can be found in the query [Exercise7.ql](solutions/Exercise7.ql)
 The second requirement for the vulnerable case is the participation in a computation that results in a pointer.
 Complete the query by establishing that the parameter `n` is used to compute a pointer and put it in [Exercise8.ql](exercises/Exercise8.ql).
 
+You can run your solution on a prebuilt [database](https://drive.google.com/file/d/1fWBKEVs3uw6zzFwGV1IeNRUhizWL76dC/view?usp=share_link) of the Linux kernel v5.12 and see if this finds the conversion part of [CVE-2021-33909]( https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-33909)
+
 <details>
 <summary>Hints</summary>
 
