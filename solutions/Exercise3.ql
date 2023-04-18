@@ -1,15 +1,11 @@
 import cpp
 
 class SignedInt extends IntType {
-	SignedInt() {
-		this.isSigned()
-	}
+  SignedInt() { this.isSigned() }
 }
 
 class UnsignedInt extends IntType {
-  UnsignedInt() {
-    this.isUnsigned()
-  }
+  UnsignedInt() { this.isUnsigned() }
 }
 
 class SignedToUnsignedConversion extends IntegralConversion {
@@ -19,5 +15,5 @@ class SignedToUnsignedConversion extends IntegralConversion {
   }
 }
 
-from SignedToUnsignedConversion s 
+from SignedToUnsignedConversion s
 select s

@@ -2,15 +2,11 @@ import cpp
 import semmle.code.cpp.dataflow.DataFlow
 
 class SignedInt extends IntType {
-	SignedInt() {
-		this.isSigned()
-	}
+  SignedInt() { this.isSigned() }
 }
 
 class UnsignedInt extends IntType {
-	UnsignedInt() {
-		this.isUnsigned()
-	}
+  UnsignedInt() { this.isUnsigned() }
 }
 
 class UnsignedToSigned extends IntegralConversion {
