@@ -32,7 +32,7 @@ In this workshop we will explore integer conversion, how it is represented by th
 - Clone this repository:
   
   ```bash
-  git clone https://github.com/knewbury01/codeql-workshop-integer-conversion.git
+  git clone https://github.com/rvermeulen/codeql-workshop-integer-conversion.git
   ```
 
 - Install the CodeQL pack dependencies using the command `CodeQL: Install Pack Dependencies` and select `exercises`, `exercises-tests`, `solutions`, and `solutions-tests`.
