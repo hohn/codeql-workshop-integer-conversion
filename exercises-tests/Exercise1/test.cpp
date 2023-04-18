@@ -18,4 +18,11 @@ void test() {
 
   myuint l;
   myotheruint m;
+
+  const int n = 1;
+  const myint o = 2;
+  const myotherint p = 3;
+  const unsigned int q = 4;
+  const myuint r = 5;
+  const myotheruint s = 6;
 }

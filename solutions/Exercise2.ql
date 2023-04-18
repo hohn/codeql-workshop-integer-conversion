@@ -5,5 +5,5 @@ class UnsignedInt extends IntType {
 }
 
 from Variable v
-where v.getUnderlyingType() instanceof UnsignedInt
+where v.getUnspecifiedType() instanceof UnsignedInt
 select v

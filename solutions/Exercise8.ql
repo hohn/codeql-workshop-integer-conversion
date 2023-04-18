@@ -11,8 +11,8 @@ class UnsignedInt extends IntType {
 
 class UnsignedToSigned extends IntegralConversion {
   UnsignedToSigned() {
-    this.getExpr().getUnderlyingType() instanceof UnsignedInt and
-    this.getUnderlyingType() instanceof SignedInt
+    this.getExpr().getUnspecifiedType() instanceof UnsignedInt and
+    this.getUnspecifiedType() instanceof SignedInt
   }
 }
 

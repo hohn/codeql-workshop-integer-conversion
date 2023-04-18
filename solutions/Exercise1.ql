@@ -5,5 +5,5 @@ class SignedInt extends IntType {
 }
 
 from Variable v
-where v.getUnderlyingType() instanceof SignedInt
+where v.getUnspecifiedType() instanceof SignedInt
 select v
