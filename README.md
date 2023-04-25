@@ -32,14 +32,14 @@ In this workshop we will explore integer conversion, how it is represented by th
 - Clone this repository:
   
   ```bash
-  git clone https://github.com/rvermeulen/codeql-workshop-integer-conversion.git
+  git clone https://github.com/hohn/codeql-workshop-integer-conversion.git
   ```
 
 - Install the CodeQL pack dependencies using the command `CodeQL: Install Pack Dependencies` and select `exercises`, `exercises-tests`, `solutions`, and `solutions-tests`.
 
 ## Workshop
 
-### Learnings
+### Format and learning objectives
 
 The workshop is split into multiple exercises introducing control flow.
 In these exercises you will learn:
@@ -56,7 +56,9 @@ Most security related type conversion issues are implicit conversion from *signe
 
 In CodeQL all conversions are modeled by the class [`Conversion`](https://codeql.github.com/codeql-standard-libraries/cpp/semmle/code/cpp/exprs/Cast.qll/type.Cast$Conversion.html) and its sub-classes.
 
-### Signed to unsigned
+### Signed to unsigned 
+
+XX:???
 
 The implicit conversion becomes relevant in function calls such as in the following example where there is an implicit conversion from `int` to `size_t` (defined as `unsigned int`).
 
@@ -86,13 +88,10 @@ Next are the exercises used to further explore integer conversion.
 
 Create the a class `SignedInt` that represents that specific `IntType` type. Then write a query that uses class to return all occurrences of that type in any source code. Implement this in [Exercise1.ql](exercises/Exercise1.ql).
 
-<details>
-<summary>Hints</summary>
 
 - The `class` keyword is used to write a user defined QL class.
 - C/C++ provides ways such as `typedef` and `using` to create type aliases. The predicate `getUnderlyingType` gets the type after resolving typedefs.
 
-</details>
 
 A solution can be found in the query [Exercise1.ql](solutions/Exercise1.ql)
 
@@ -100,12 +99,7 @@ A solution can be found in the query [Exercise1.ql](solutions/Exercise1.ql)
 
 Create the a class `UnsignedInt` that represents that specific `IntType` type. Then write a query that uses class to return all occurrences of that type in any source code. Implement this in [Exercise2.ql](exercises/Exercise2.ql).
 
-<details>
-<summary>Hints</summary>
-
 - This is very similar to Exercise 1.
-
-</details>
 
 A solution can be found in the query [Exercise2.ql](solutions/Exercise2.ql)
 
@@ -125,38 +119,23 @@ Now that we have modeled the `signed int` to `unsigned int` conversion write a q
 
 A solution can be found in the query [Exercise4.ql](solutions/Exercise4.ql)
 
-<details>
-<summary>Solution Note</summary>
-
 - Note that this solution uses a `VariableAccess` as an argument of the call. This excludes direct uses of literal values.
-
-</details>
-
-<details>
-<summary>Alternative Solution</summary>
-
-```ql
-import cpp
-
-from FunctionCall call, int idx, Expr arg
-where call.getArgument(idx) = arg and arg.getUnspecifiedType().(IntType).isSigned() and not arg.isConstant() and
-call.getTarget().getParameter(idx).getUnspecifiedType().(IntType).isUnsigned()
-select call, arg
-```
-
-</details>
+- An alternative approach
+  ```ql
+  import cpp
+   
+  from FunctionCall call, int idx, Expr arg
+  where call.getArgument(idx) = arg and arg.getUnspecifiedType().(IntType).isSigned() and not arg.isConstant() and
+  call.getTarget().getParameter(idx).getUnspecifiedType().(IntType).isUnsigned()
+  select call, arg
+  ```
 
 ### Exercise 5
 
 On a real-world database our current query provides a lot of results so it is key to turning this into a manageable list that can be audited.
 Implement a heuristic that can meaningfully reduce the list of results in [Exercise5.ql](exercises/Exercise5.ql).
 
-<details>
-<summary>Hints</summary>
-
   - Look for parameters containing the sub-string `len`, `size`, or `nbyte`.
-
-</details>
 
 A solution can be found in the query [Exercise5.ql](solutions/Exercise5.ql)
 
@@ -164,12 +143,7 @@ A solution can be found in the query [Exercise5.ql](solutions/Exercise5.ql)
 
 Implement another possible heuristic that can meaningfully reduce the list of results in [Exercise6.ql](exercises/Exercise6.ql).
 
-<details>
-<summary>Hints</summary>
-
   - Look for parameters of type `size_t`.
-
-</details>
 
 A solution can be found in the query [Exercise6.ql](solutions/Exercise6.ql)
 
@@ -199,12 +173,7 @@ The variable `n` can range from `-2147483648` to `2147483648` (assuming 32-bit i
 
 To find the above vulnerable case, start by writing the class `UnsignedToSigned` that identifies conversions from `unsigned int` to `signed int` and put it in [Exercise7.ql](exercises/Exercise7.ql).
 
-<details>
-<summary>Hints</summary>
-
 - this is similar to what we did in Exercise 1-3.
-
-</details>
 
 A solution can be found in the query [Exercise7.ql](solutions/Exercise7.ql)
 
@@ -215,13 +184,10 @@ Complete the query by establishing that the parameter `n` is used to compute a p
 
 You can run your solution on a prebuilt [database](https://drive.google.com/file/d/1fWBKEVs3uw6zzFwGV1IeNRUhizWL76dC/view?usp=share_link) of the Linux kernel v5.12 and see if this finds the conversion part of [CVE-2021-33909]( https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-33909)
 
-<details>
-<summary>Hints</summary>
 
 - Pointer arithmetic operations are modeled by the class `PointerArithmeticOperation`.
 - Dataflow analysis can help with determining if a value is used somewhere. For local dataflow analysis you can use `DataFlow::localFlow`
 - The dataflow library provides helper predicates such as `DataFlow::parameterNode` and `DataFlow::exprNode` to relate AST elements to their dataflow graph counterparts.
 
-</details>
 
 A solution can be found in the query [Exercise8.ql](solutions/Exercise8.ql).
