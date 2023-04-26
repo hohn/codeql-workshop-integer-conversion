@@ -187,8 +187,12 @@ Some hints:
 - Note that this solution uses a `VariableAccess` as an argument of the call. This
   excludes direct uses of literal values.
 
-- An alternative approach that uses inline type restrictions and is frequently
-  found in the CodeQL standard library:
+
+### Exercise 4a
+The following is an alternative approach to writing queries that uses inline type
+restrictions; this terse style is is frequently found in the CodeQL standard
+library.
+
 
   ```ql
   import cpp
@@ -261,27 +265,25 @@ A solution can be found in the query [Exercise7.ql](solutions/Exercise7.ql)
 
 ### Exercise 7a
 
-An alternative approach to writing queries that uses inline type restrictions and
-predicates and is frequently found in the CodeQL standard library.
+The following is an alternative approach to writing queries that uses inline type
+restrictions; this terse style is is frequently found in the CodeQL standard
+library.
 
-XX:  TODO
+It's found in [Exercise7a.ql](solutions/Exercise7a.ql)
 
   ```ql
   import cpp
    
-  from FunctionCall call, int idx, Expr arg
-   
-  where call.getArgument(idx) = arg
-  and
-  arg.getUnspecifiedType().(IntType).isSigned()
-  and not arg.isConstant()
-  and
-  call.getTarget().getParameter(idx).getUnspecifiedType().(IntType).isUnsigned()
-   
-  select call, arg
+  from IntegralConversion conv, IntType src, IntType dst
+  where
+    // original type
+    src = conv.getExpr().getUnspecifiedType().(IntType) and
+    src.isUnsigned() and
+    // converted type
+    dst = conv.getUnspecifiedType().(IntType) and
+    dst.isSigned()
+  select conv, "original type: " + src + " Converted type: " + conv.getUnspecifiedType().(IntType)
   ```
-
-
 
 ### Exercise 8
 
