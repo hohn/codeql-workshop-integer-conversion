@@ -37,6 +37,10 @@ In this workshop we will explore integer conversion, how it is represented by th
 
 - Install the CodeQL pack dependencies using the command `CodeQL: Install Pack Dependencies` and select `exercises`, `exercises-tests`, `solutions`, and `solutions-tests`.
 
+- (For exercise 5 and beyond) Get the real-world
+  [database](https://drive.google.com/file/d/1fWBKEVs3uw6zzFwGV1IeNRUhizWL76dC/view?usp=share_link)
+  of the Linux kernel v5.12 and unzip it.
+
 ## Workshop
 
 ### Format and learning objectives
@@ -90,8 +94,10 @@ In CodeQL all conversions are modeled by the class [`Conversion`](https://codeql
 
 ### Signed to unsigned 
 
-The implicit conversion becomes relevant in function calls such as in the following example where there is an implicit conversion from `int` to `size_t` (defined as `unsigned int`).
-(See [sample1](exercises-tests/Sample1/sample1.cpp) for more)
+The implicit conversion becomes relevant in function calls such as in the
+following example where there is an implicit conversion from `int` to `size_t`
+`size_t` as used by `read` is defined as `unsigned int`, but the call uses plain
+`int`.  (See [sample1](exercises-tests/Sample1/sample1.cpp) for code)
 
 ```cpp
 int get_input(int fd);
@@ -124,9 +130,11 @@ Next are the exercises used to further explore integer conversion.
     conversion.
 4.  Test this on simple test code.
 5.  Test it on linux kernel code.
-6.  Narrow the result set via simple heuristics based on names and types.
+6.  (on the kernel): Narrow the result set via simple heuristics based on names and types.
+7.  (on the kernel): Unsigned to signed conversion, and queries using predicates and casts.
+8.  (on the kernel): Unsigned to signed conversions in the presence of pointers.
 
-## Exercises
+## Goal 1 exercises
 
 ### Exercise 1
 
@@ -139,6 +147,8 @@ Create the a class `SignedInt` that represents that specific `IntType` type. The
 
 A solution can be found in the query [Exercise1.ql](solutions/Exercise1.ql)
 
+## Goal 2 exercises
+
 ### Exercise 2
 
 Create the a class `UnsignedInt` that represents that specific `IntType` type. Then write a query that uses class to return all occurrences of that type in any source code. Implement this in [Exercise2.ql](exercises/Exercise2.ql).
@@ -146,6 +156,8 @@ Create the a class `UnsignedInt` that represents that specific `IntType` type. T
 - This is very similar to Exercise 1.
 
 A solution can be found in the query [Exercise2.ql](solutions/Exercise2.ql)
+
+## Goal 3 & 4 exercises
 
 ### Exercise 3
 
@@ -159,30 +171,41 @@ A solution can be found in the query [Exercise3.ql](solutions/Exercise3.ql)
 
 ### Exercise 4
 
-Now that we have modeled the `signed int` to `unsigned int` conversion write a query that find the vulnerable conversion, in [Exercise4.ql](exercises/Exercise4.ql).
+Now that we have modeled the `signed int` to `unsigned int` conversion write a
+query that finds the vulnerable conversion, in
+[Exercise4.ql](exercises/Exercise4.ql).
 
 A solution can be found in the query [Exercise4.ql](solutions/Exercise4.ql)
 
+Some hints:
 - There are several type-related predicates `.getUnspecifiedType()` is the one we
   want.
 
-- XX: member predicates??
-
-- `arg.getConversion()`??
+- If an expression is a conversion, the predicate `.getConversion()` will give it
+  to us.
 
 - Note that this solution uses a `VariableAccess` as an argument of the call. This
   excludes direct uses of literal values.
 
-- An alternative approach
+- An alternative approach that uses inline type restrictions and is frequently
+  found in the CodeQL standard library:
+
   ```ql
   import cpp
    
   from FunctionCall call, int idx, Expr arg
-  where call.getArgument(idx) = arg and arg.getUnspecifiedType().(IntType).isSigned() and not arg.isConstant() and
+   
+  where call.getArgument(idx) = arg
+  and
+  arg.getUnspecifiedType().(IntType).isSigned()
+  and not arg.isConstant()
+  and
   call.getTarget().getParameter(idx).getUnspecifiedType().(IntType).isUnsigned()
+   
   select call, arg
   ```
 
+## Goal 5 & 6 exercises
 ### Exercise 5
 
 On the real-world
@@ -197,19 +220,20 @@ that can meaningfully reduce the list of results in
 A solution can be found in the query [Exercise5.ql](solutions/Exercise5.ql)
 
 ### Exercise 6
-
 Implement another possible heuristic that can meaningfully reduce the list of results in [Exercise6.ql](exercises/Exercise6.ql).
 
   - Look for parameters of type `size_t`.
 
 A solution can be found in the query [Exercise6.ql](solutions/Exercise6.ql)
 
+## Goal 7 exercises
 ### Exercise 7
 
 In the opposite direction unsigned to signed conversion can result in [out of bounds access]( https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-33909) when the signed value is used in a pointer computation. CVE-2021-33909 is discussed by [Qualys](https://blog.qualys.com/vulnerabilities-threat-research/2021/07/20/sequoia-a-local-privilege-escalation-vulnerability-in-linuxs-filesystem-layer-cve-2021-33909) and [Sequoia variant analysis](https://pwning.systems/posts/sequoia-variant-analysis/).
 The latter discusses a CodeQL query similar to the production query used as an inspiration that can be found at [UnsignedToSignedPointerArith.ql](https://github.com/github/codeql/blob/main/cpp/ql/src/experimental/Security/CWE/CWE-787/UnsignedToSignedPointerArith.ql).
 
-Consider the following example:
+Consider the following example, found in
+[Exercise7/test.cpp](solutions-tests/Exercise7/test.cpp)
 
 ```cpp
 char* out_of_bounds(char * c, int n) {
@@ -234,17 +258,50 @@ To find the above vulnerable case, start by writing the class `UnsignedToSigned`
 
 A solution can be found in the query [Exercise7.ql](solutions/Exercise7.ql)
 
+
+### Exercise 7a
+
+An alternative approach to writing queries that uses inline type restrictions and
+predicates and is frequently found in the CodeQL standard library.
+
+XX:  TODO
+
+  ```ql
+  import cpp
+   
+  from FunctionCall call, int idx, Expr arg
+   
+  where call.getArgument(idx) = arg
+  and
+  arg.getUnspecifiedType().(IntType).isSigned()
+  and not arg.isConstant()
+  and
+  call.getTarget().getParameter(idx).getUnspecifiedType().(IntType).isUnsigned()
+   
+  select call, arg
+  ```
+
+
+
 ### Exercise 8
 
-The second requirement for the vulnerable case is the participation in a computation that results in a pointer.
-Complete the query by establishing that the parameter `n` is used to compute a pointer and put it in [Exercise8.ql](exercises/Exercise8.ql).
+The second requirement for the vulnerable case is the participation in a
+computation that results in a pointer.  Complete the query by establishing that
+the parameter `n` is used to compute a pointer and put it in
+[Exercise8.ql](exercises/Exercise8.ql).
 
-You can run your solution on a prebuilt [database](https://drive.google.com/file/d/1fWBKEVs3uw6zzFwGV1IeNRUhizWL76dC/view?usp=share_link) of the Linux kernel v5.12 and see if this finds the conversion part of [CVE-2021-33909]( https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-33909)
+You can run your solution on a prebuilt
+[database](https://drive.google.com/file/d/1fWBKEVs3uw6zzFwGV1IeNRUhizWL76dC/view?usp=share_link)
+of the Linux kernel v5.12 and see if this finds the conversion part of
+[CVE-2021-33909]( https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-33909)
 
 
-- Pointer arithmetic operations are modeled by the class `PointerArithmeticOperation`.
-- Dataflow analysis can help with determining if a value is used somewhere. For local dataflow analysis you can use `DataFlow::localFlow`
-- The dataflow library provides helper predicates such as `DataFlow::parameterNode` and `DataFlow::exprNode` to relate AST elements to their dataflow graph counterparts.
-
+- Pointer arithmetic operations are modeled by the class
+  `PointerArithmeticOperation`.
+- Dataflow analysis can help with determining if a value is used somewhere. For
+  local dataflow analysis you can use `DataFlow::localFlow`
+- The dataflow library provides helper predicates such as
+  `DataFlow::parameterNode` and `DataFlow::exprNode` to relate AST elements to
+  their dataflow graph counterparts.
 
 A solution can be found in the query [Exercise8.ql](solutions/Exercise8.ql).
