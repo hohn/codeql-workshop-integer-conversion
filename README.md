@@ -41,6 +41,38 @@ In this workshop we will explore integer conversion, how it is represented by th
 
 ### Format and learning objectives
 
+This repository has the directory structure
+```
+exercises
+exercises-tests
+├── Exercise1
+├── Exercise2
+├── Exercise3
+├── Exercise4
+├── Exercise5
+├── Exercise6
+├── Exercise7
+└── Exercise8
+solutions
+solutions-tests
+├── Exercise1
+├── Exercise2
+├── Exercise3
+├── Exercise4
+├── Exercise5
+├── Exercise6
+├── Exercise7
+└── Exercise8
+```
+The `exercises` directory has templates for you to fill in as you work through
+this tutorial; the `exercises-tests` directory has tests for correct answers and
+can be used to 
+1.  check your work
+2.  produce databases for development.  When a test fails, the database stays and
+    can be imported/used for query development.
+
+The `solutions` and `solutions-tests` trees have complete examples.
+
 The workshop is split into multiple exercises introducing control flow.
 In these exercises you will learn:
 
@@ -58,12 +90,14 @@ In CodeQL all conversions are modeled by the class [`Conversion`](https://codeql
 
 ### Signed to unsigned 
 
-XX:???
-
 The implicit conversion becomes relevant in function calls such as in the following example where there is an implicit conversion from `int` to `size_t` (defined as `unsigned int`).
+(See [sample1](exercises-tests/Sample1/sample1.cpp) for more)
 
 ```cpp
-int get_len(int fd);
+int get_input(int fd);
+using size_t = unsigned int;
+size_t read(int fildes, void *buf, size_t nbyte);
+
 void buffer_overflow(int fd) {
 	int len;
 	char buf[128];
@@ -81,6 +115,16 @@ In the following exercise we are going to implement a basic query to find the ab
 Why does the conversion pose a security risk?
 
 Next are the exercises used to further explore integer conversion.
+
+## Goals
+1.  Find all signed ints; define class `SignedInt`
+2.  Find all unsigned ints; define class `UnsignedInt`
+3.  Find all conversions from signed to unsigned int; define class
+    `SignedToUnsignedConversion` that models a signed int to unsigned int
+    conversion.
+4.  Test this on simple test code.
+5.  Test it on linux kernel code.
+6.  Narrow the result set via simple heuristics based on names and types.
 
 ## Exercises
 
@@ -119,7 +163,16 @@ Now that we have modeled the `signed int` to `unsigned int` conversion write a q
 
 A solution can be found in the query [Exercise4.ql](solutions/Exercise4.ql)
 
-- Note that this solution uses a `VariableAccess` as an argument of the call. This excludes direct uses of literal values.
+- There are several type-related predicates `.getUnspecifiedType()` is the one we
+  want.
+
+- XX: member predicates??
+
+- `arg.getConversion()`??
+
+- Note that this solution uses a `VariableAccess` as an argument of the call. This
+  excludes direct uses of literal values.
+
 - An alternative approach
   ```ql
   import cpp
@@ -132,8 +185,12 @@ A solution can be found in the query [Exercise4.ql](solutions/Exercise4.ql)
 
 ### Exercise 5
 
-On a real-world database our current query provides a lot of results so it is key to turning this into a manageable list that can be audited.
-Implement a heuristic that can meaningfully reduce the list of results in [Exercise5.ql](exercises/Exercise5.ql).
+On the real-world
+[database](https://drive.google.com/file/d/1fWBKEVs3uw6zzFwGV1IeNRUhizWL76dC/view?usp=share_link)
+of the Linux kernel v5.12 our current query provides a lot of results so it is key
+to turning this into a manageable list that can be audited.  Implement a heuristic
+that can meaningfully reduce the list of results in
+[Exercise4.ql](solutions/Exercise4.ql).
 
   - Look for parameters containing the sub-string `len`, `size`, or `nbyte`.
 
